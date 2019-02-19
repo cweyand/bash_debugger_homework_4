@@ -1,0 +1,56 @@
+# After each line of the test script is executed the shell traps to
+# this function.
+
+function _steptrap
+{
+    _curline=$1		# the number of the line that just ran
+
+    (( $_trace )) && _msg "$PS4 line $_curline: ${_lines[$_curline]}"
+    
+    if (( $_steps >= 0 )); then
+	let _steps="$_steps - 1"
+    fi
+
+# First check to see if a line number breakpoint was reached.
+# If it was, then enter the debugger.
+    if _at_linenumbp ; then
+	_msg "Reached breakpoint at line $_curline"
+	_cmdloop
+
+# It wasnt, so check whether a break condition exists and is true.
+# If it is, then enter the debugger.
+    elif [ -n "$_brcond" ] && eval $_brcond; then
+	_msg "Break condition $_brcond true at line $_curline"
+	_cmdloop
+
+# It wasnt, so check if we are in step mode and the number of steps
+# is up. If it is then enter the debugger.
+    elif (( $_steps == 0 )); then
+	_msg "Stopped at line $_curline"
+	_cmdloop
+    fi
+}     
+
+# The Debugger Command Loop
+
+function _cmdloop {
+    local cmd args
+
+    while read -e -p "bashdb> " cmd args; do
+	case $cmd in
+	    \? | h ) _menu ;;		# print command menu
+	    bc ) _setbc $args ;;	# set a break condition
+	    bp ) _setbp $args ;;	# set a breakpoint at the given line
+	    cb ) _clearbp $args ;;	# clear one or all breakpoints
+	    ds ) _displayscript ;;	# list the script and show the breakpoints
+	    g  ) return ;;		# "go": start/resume execution of the script
+	    q  ) exit ;;		# quit
+	    s  ) let _steps=${args:-1}  # single step N times   
+					# (default = 1)
+		 return ;;
+	    x  ) _xtrace ;;		# toggle execution trace
+	    !* ) eval ${cmd#!} $args ;; # pass to the shell
+	    *  ) _msg "Invalid command: '$cmd'" ;;
+	esac
+    done
+}
