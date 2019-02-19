@@ -1,7 +1,6 @@
-#!/bin/bash
-#bashdb preamble
-#this file get prepended to the shell script being debugged
-#arguments:
+# bashdb preamble
+# this file get prepended to the shell script being debugged
+# arguments:
 # $1 = the name of the original guinea pig script
 # $2 = the directory where temporary files are stored
 # $3 = the directory where bashdb.pre and bashdb.fns are stored
