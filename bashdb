@@ -1,9 +1,5 @@
-#!/bin/bash
-
 #bashdb- a bash debugger
 #driver script- concats the preamble and target script then executes the new script
-#courtney a weyand
-#february 19, 2019
 
 echo 'bash Debugger version 1.0'
 
